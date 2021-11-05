@@ -1,11 +1,9 @@
 package com.saemodong.api.service.activity;
 
-import com.saemodong.api.model.activity.Activity;
 import com.saemodong.api.repository.activity.ActivityRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +19,7 @@ public class ActivityService {
 
   public Pageable getPageable(Integer page, String sorter) {
     if (sorter.equals("latestAsc")) {
-      return PageRequest.of(page, 10, Sort.by("registeredAt").descending());
+      return PageRequest.of(page, 10, Sort.by("createdAt").descending());
     } else {
       return PageRequest.of(page, 10, Sort.by("closedAt").ascending());
     }
@@ -38,7 +36,7 @@ public class ActivityService {
       LocalDateTime startDate =
           LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(20, 0, 0, 0));
       LocalDateTime endDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59, 59));
-      return activityRepository.findAllByIsDeletedAndRegisteredAtBetween(
+      return activityRepository.findAllByIsDeletedAndCreatedAtBetween(
           paging, "N", startDate, endDate);
     } else if (sorter.equals("ddayAsc") && isToday.equals("N")) {
       // sorter: 마감일순, isToday: N
@@ -50,7 +48,7 @@ public class ActivityService {
           LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(20, 0, 0));
       LocalDateTime endDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
 
-      return activityRepository.findAllByIsDeletedAndRegisteredAtBetween(
+      return activityRepository.findAllByIsDeletedAndCreatedAtBetween(
           paging, "N", startDate, endDate);
     }
   }

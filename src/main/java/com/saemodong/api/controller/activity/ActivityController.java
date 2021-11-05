@@ -1,12 +1,15 @@
 package com.saemodong.api.controller.activity;
 
-import com.saemodong.api.dto.BaseResponse;
+import com.saemodong.api.common.KeyValidator;
+import com.saemodong.api.dto.ApiResponse;
+import com.saemodong.api.dto.FailureResponse;
 import com.saemodong.api.dto.ResultCode;
 import com.saemodong.api.dto.SuccessResponse;
 import com.saemodong.api.service.activity.ActivityPageResponse;
 import com.saemodong.api.service.activity.ActivityService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +24,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class ActivityController {
 
   private final ActivityService activityService;
+  private final KeyValidator keyValidator;
 
   @GetMapping("")
-  public ResponseEntity<? extends BaseResponse> getActivity(
+  public ResponseEntity<? extends ApiResponse> getActivity(
+      @RequestParam String apiKey,
       @RequestParam Integer page,
       @ValuesAllowed(
               propName = "sorter",
@@ -36,9 +41,14 @@ public class ActivityController {
           @RequestParam(required = false, defaultValue = "N")
           String isToday) {
 
+    if (!keyValidator.validate(apiKey)) {
+      return new ResponseEntity(
+          FailureResponse.of(ResultCode.NOT_FOUND, "사용자가 존재하지 않습니다."), HttpStatus.NOT_FOUND);
+    }
+
     ActivityPageResponse activityPageResponse =
         activityService.getActivityList(page, sorter, isToday);
 
-    return ResponseEntity.ok(SuccessResponse.of(ResultCode.OK, activityPageResponse));
+    return ResponseEntity.ok(SuccessResponse.of(activityPageResponse));
   }
 }

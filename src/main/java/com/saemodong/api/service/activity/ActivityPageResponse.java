@@ -20,6 +20,7 @@ public class ActivityPageResponse {
       Integer currentPage, Integer totalPage, List<Activity> pageResult) {
     List<ActivityResponseDto> result =
         pageResult.stream().map(ActivityResponseDto::of).collect(Collectors.toList());
-    return new ActivityPageResponse(currentPage , totalPage, result);
+
+    return new ActivityPageResponse(currentPage, totalPage, result);
   }
 }

@@ -1,5 +1,6 @@
 package com.saemodong.api.model.activity;
 
+import com.saemodong.api.model.BaseTimeEntity;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -13,7 +14,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Getter
 @Entity
 @NoArgsConstructor
-public class Activity {
+public class Activity extends BaseTimeEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -22,7 +23,7 @@ public class Activity {
   private String name;
 
   @Column(nullable = false)
-  private ActivityType type;
+  private Integer type;
 
   @Column private String url;
 
@@ -31,10 +32,6 @@ public class Activity {
 
   @Column(nullable = false)
   private LocalDateTime closedAt;
-
-  @Column private LocalDateTime registeredAt;
-
-  @Column private LocalDateTime updatedAt;
 
   @Column(length = 1, nullable = false)
   @ColumnDefault("'N'")

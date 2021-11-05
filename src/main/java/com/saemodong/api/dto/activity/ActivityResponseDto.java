@@ -12,11 +12,11 @@ import lombok.Getter;
 public class ActivityResponseDto {
   private Long id;
   private String name;
-  private ActivityType type;
+  private Integer type;
   private String url;
   private LocalDateTime openedAt;
   private LocalDateTime closedAt;
-  private LocalDateTime registeredAt;
+  private LocalDateTime createdAt;
 
   public static ActivityResponseDto of(Activity activity) {
     return new ActivityResponseDto(
@@ -26,6 +26,6 @@ public class ActivityResponseDto {
         activity.getUrl(),
         activity.getOpenedAt(),
         activity.getClosedAt(),
-        activity.getRegisteredAt());
+        activity.getCreatedAt());
   }
 }
