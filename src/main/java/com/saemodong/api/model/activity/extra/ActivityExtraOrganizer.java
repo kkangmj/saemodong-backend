@@ -19,6 +19,6 @@ public class ActivityExtraOrganizer {
   private Activity activity;
 
   @ManyToOne
-  @JoinColumn(name="organizerId")
+  @JoinColumn(name="extraOrganizerId")
   private ExtraOrganizer extraOrganizer;
 }

@@ -1,9 +1,17 @@
 package com.saemodong.api.service.activity;
 
+import com.saemodong.api.dto.activity.ActivityResponseDto;
+import com.saemodong.api.mapper.ActivityFieldMapper;
+import com.saemodong.api.model.activity.Activity;
+import com.saemodong.api.repository.activity.ActivityCustomRepositoryImpl;
 import com.saemodong.api.repository.activity.ActivityRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +24,8 @@ import org.springframework.stereotype.Service;
 public class ActivityService {
 
   private final ActivityRepository activityRepository;
+  private final ActivityFieldMapper activityFieldMapper;
+  private final ActivityCustomRepositoryImpl activityCustomRepositoryImpl;
 
   public Pageable getPageable(Integer page, String sorter) {
     if (sorter.equals("latestAsc")) {
@@ -56,9 +66,65 @@ public class ActivityService {
   public ActivityPageResponse getActivityList(Integer page, String sorter, String isToday) {
 
     Pageable paging = getPageable(page, sorter);
-    Page pageResult = getPage(paging, sorter, isToday);
+    Page<Activity> pageResult = getPage(paging, sorter, isToday);
+
+    List<ActivityResponseDto> result =
+        pageResult.getContent().stream()
+            .map(
+                activity ->
+                    ActivityResponseDto.of(
+                        activity,
+                        activityFieldMapper.getActivityField(activity.getId(), activity.getType())))
+            .collect(Collectors.toList());
+
+    return ActivityPageResponse.toPageResponse(page, pageResult.getTotalPages(), result);
+  }
+
+  public ActivityPageResponse getActivityExtraList(
+      Integer page, String sorter, String type, String field, String organizer, String district) {
+
+    List<Long> typeId = new ArrayList<>();
+    List<Long> fieldId = new ArrayList<>();
+    List<Long> organizerId = new ArrayList<>();
+    List<Long> districtId = new ArrayList<>();
+
+    if (!type.isEmpty()) {
+      typeId = splitByDivider(type);
+    }
+    if (!field.isEmpty()) {
+      fieldId = splitByDivider(field);
+    }
+    if (!organizer.isEmpty()) {
+      organizerId = splitByDivider(organizer);
+    }
+    if (!district.isEmpty()) {
+      districtId = splitByDivider(district);
+    }
+
+    List<ActivityResponseDto> result =
+        activityCustomRepositoryImpl
+            .findAllBy(page, sorter, typeId, fieldId, districtId, organizerId)
+            .stream()
+            .map(
+                activity ->
+                    ActivityResponseDto.of(
+                        activity,
+                        activityFieldMapper.getActivityField(activity.getId(), activity.getType())))
+            .collect(Collectors.toList());
 
     return ActivityPageResponse.toPageResponse(
-        page, pageResult.getTotalPages(), pageResult.getContent());
+        page,
+        activityCustomRepositoryImpl.getTotalPage(sorter, typeId, fieldId, districtId, organizerId),
+        result);
+  }
+
+  private List<Long> splitByDivider(String target) {
+    return splitByDivider("\\+", target);
+  }
+
+  private List<Long> splitByDivider(String divider, String target) {
+    return Arrays.asList(target.split(divider)).stream()
+        .map(Long::parseLong)
+        .collect(Collectors.toList());
   }
 }

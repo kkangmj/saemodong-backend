@@ -51,4 +51,34 @@ public class ActivityController {
 
     return ResponseEntity.ok(SuccessResponse.of(activityPageResponse));
   }
+
+  @GetMapping("/extra")
+  public ResponseEntity<? extends ApiResponse> getExtraActivity(
+      @RequestParam String apiKey,
+      @RequestParam Integer page,
+      @ValuesAllowed(
+              propName = "sorter",
+              values = {"latestAsc", "ddayAsc"})
+          @RequestParam(required = false, defaultValue = "latestAsc")
+          String sorter,
+      @RequestParam(required = false, defaultValue = "") String type,
+      @RequestParam(required = false, defaultValue = "") String field,
+      @RequestParam(required = false, defaultValue = "") String organizer,
+      @RequestParam(required = false, defaultValue = "") String district) {
+
+    if (!keyValidator.validate(apiKey)) {
+      return new ResponseEntity(
+          FailureResponse.of(ResultCode.NOT_FOUND, "사용자가 존재하지 않습니다."), HttpStatus.NOT_FOUND);
+    }
+
+    ActivityPageResponse activityPageResponse =
+        activityService.getActivityExtraList(page, sorter, type, field, organizer, district);
+
+    return ResponseEntity.ok(SuccessResponse.of(activityPageResponse));
+  }
+
+  //  @GetMapping("/contest")
+  //  public ResponseEntity<? extends ApiResponse> getContestActivity(){
+  //
+  //  }
 }

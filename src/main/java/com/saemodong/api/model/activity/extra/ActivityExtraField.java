@@ -7,18 +7,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class ActivityExtraField {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @ManyToOne
-  @JoinColumn(name="activityId")
+  @JoinColumn(name = "activityId")
   private Activity activity;
 
   @ManyToOne
-  @JoinColumn(name="extraFieldId")
+  @JoinColumn(name = "extraFieldId")
   private ExtraField extraField;
 }
