@@ -13,7 +13,7 @@ public class KeyValidator {
 
   private  final UserRepository userRepository;
 
-  public boolean validate(String apiKey){
+  public boolean validate(String apiKey) {
     Optional<User> user = userRepository.findByApiKey(apiKey);
     return user.isPresent();
   }

@@ -18,4 +18,9 @@ public class SwaggerConfig {
   public GroupedOpenApi userApis() {
     return GroupedOpenApi.builder().group("user").pathsToMatch("/**/user/**").build();
   }
+
+  @Bean
+  public GroupedOpenApi bookmarkApis() {
+    return GroupedOpenApi.builder().group("bookmark").pathsToMatch("/**/bookmark/**").build();
+  }
 }

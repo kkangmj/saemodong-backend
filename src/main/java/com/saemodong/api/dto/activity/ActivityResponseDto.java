@@ -1,7 +1,6 @@
 package com.saemodong.api.dto.activity;
 
 import com.saemodong.api.model.activity.Activity;
-import com.saemodong.api.model.activity.ActivityType;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;
@@ -19,8 +18,10 @@ public class ActivityResponseDto {
   private LocalDateTime openedAt;
   private LocalDateTime closedAt;
   private LocalDateTime createdAt;
+  private boolean marked;
 
-  public static ActivityResponseDto of(Activity activity, List<String> activityField) {
+  public static ActivityResponseDto of(
+      Activity activity, List<String> activityField, boolean marked) {
     return new ActivityResponseDto(
         activity.getId(),
         activity.getName(),
@@ -29,6 +30,7 @@ public class ActivityResponseDto {
         activity.getUrl(),
         activity.getOpenedAt(),
         activity.getClosedAt(),
-        activity.getCreatedAt());
+        activity.getCreatedAt(),
+        marked);
   }
 }
