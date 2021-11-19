@@ -6,7 +6,8 @@ import com.saemodong.api.dto.ApiResponse;
 import com.saemodong.api.dto.FailureResponse;
 import com.saemodong.api.dto.ResultCode;
 import com.saemodong.api.dto.SuccessResponse;
-import com.saemodong.api.dto.user.UserInterestRequestDto;
+import com.saemodong.api.dto.user.ContestInterestDto;
+import com.saemodong.api.dto.user.ExtraInterestDto;
 import com.saemodong.api.dto.user.UserLoginResponseDto;
 import com.saemodong.api.dto.user.UserRequestDto;
 import com.saemodong.api.dto.user.UserRegisterResponseDto;
@@ -56,34 +57,80 @@ public class UserController {
     if (user.isPresent()) {
       return ResponseEntity.ok(
           SuccessResponse.of(
-              UserLoginResponseDto.of(user.get().getNickname(), user.get().getSetInterest())));
+              UserLoginResponseDto.of(
+                  user.get().getNickname(),
+                  user.get().getFeedbackUrl())));
     } else {
       return new ResponseEntity(
           FailureResponse.of(ResultCode.NOT_FOUND, "사용자가 존재하지 않습니다."), HttpStatus.NOT_FOUND);
     }
   }
 
-  @PutMapping("/interest/{apiKey}")
-  public ResponseEntity<? extends ApiResponse> setInterest(
-      @PathVariable String apiKey,
-      @RequestBody @Valid UserInterestRequestDto userInterestRequestDto) {
+  @GetMapping("interest/extra")
+  public ResponseEntity<? extends ApiResponse> getExtraInterest(@RequestParam String apiKey) {
+
+    Optional<User> user = userRepository.findByApiKey(apiKey);
+
+    if (user.isPresent()) {
+      ExtraInterestDto extraInterestDto =
+          userInterestService.getUserExtraInterest(user.get().getId());
+      return ResponseEntity.ok(SuccessResponse.of(extraInterestDto));
+    } else {
+      return new ResponseEntity(
+          FailureResponse.of(ResultCode.NOT_FOUND, "사용자가 존재하지 않습니다."), HttpStatus.NOT_FOUND);
+    }
+  }
+
+  @GetMapping("interest/contest")
+  public ResponseEntity<? extends ApiResponse> getContestInterest(@RequestParam String apiKey) {
 
     if (!keyValidator.validate(apiKey)) {
       return new ResponseEntity(
           FailureResponse.of(ResultCode.NOT_FOUND, "사용자가 존재하지 않습니다."), HttpStatus.NOT_FOUND);
+    } else {
+      Optional<User> user = userRepository.findByApiKey(apiKey);
+      ContestInterestDto contestInterestDto =
+          userInterestService.getUserContestInterest(user.get().getId());
+      return ResponseEntity.ok(SuccessResponse.of(contestInterestDto));
     }
+  }
 
-    userInterestService.setUserInterest(
-        apiKey,
-        userInterestRequestDto.getExtraInterestDto().getType(),
-        userInterestRequestDto.getExtraInterestDto().getField(),
-        userInterestRequestDto.getExtraInterestDto().getOrganizer(),
-        userInterestRequestDto.getExtraInterestDto().getDistrict(),
-        userInterestRequestDto.getContestInterestDto().getType(),
-        userInterestRequestDto.getContestInterestDto().getField(),
-        userInterestRequestDto.getContestInterestDto().getOrganizer(),
-        userInterestRequestDto.getContestInterestDto().getPrize());
+  @PutMapping("interest/extra/{apiKey}")
+  public ResponseEntity<? extends ApiResponse> setExtraInterest(
+      @PathVariable String apiKey, @RequestBody @Valid ExtraInterestDto extraInterestDto) {
 
-    return ResponseEntity.noContent().build();
+    if (!keyValidator.validate(apiKey)) {
+      return new ResponseEntity(
+          FailureResponse.of(ResultCode.NOT_FOUND, "사용자가 존재하지 않습니다."), HttpStatus.NOT_FOUND);
+    } else {
+
+      userInterestService.setUserExtraInterest(
+          apiKey,
+          extraInterestDto.getType(),
+          extraInterestDto.getField(),
+          extraInterestDto.getOrganizer(),
+          extraInterestDto.getDistrict());
+
+      return ResponseEntity.noContent().build();
+    }
+  }
+
+  @PutMapping("interest/contest/{apiKey}")
+  public ResponseEntity<? extends ApiResponse> setContestInterest(
+      @PathVariable String apiKey, @RequestBody @Valid ContestInterestDto contestInterestDto) {
+
+    if (!keyValidator.validate(apiKey)) {
+      return new ResponseEntity(
+          FailureResponse.of(ResultCode.NOT_FOUND, "사용자가 존재하지 않습니다."), HttpStatus.NOT_FOUND);
+    } else {
+      userInterestService.setUserContestInterest(
+          apiKey,
+          contestInterestDto.getType(),
+          contestInterestDto.getField(),
+          contestInterestDto.getOrganizer(),
+          contestInterestDto.getPrize());
+
+      return ResponseEntity.noContent().build();
+    }
   }
 }

@@ -28,9 +28,13 @@ public class User extends BaseTimeEntity {
   @Column(length = 20, nullable = false)
   private String apiKey;
 
-  @Column(length=1, nullable = false)
-  @ColumnDefault("'N'")
-  private String setInterest;
+  //  @Column(length = 1, nullable = false)
+  //  @ColumnDefault("'N'")
+  //  private String setInterest;
+
+  @Column
+  @ColumnDefault("''")
+  private String feedbackUrl;
 
   @Column(length = 1, nullable = false)
   @ColumnDefault("'N'")

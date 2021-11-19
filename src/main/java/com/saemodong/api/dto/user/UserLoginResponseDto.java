@@ -9,9 +9,9 @@ import lombok.Getter;
 public class UserLoginResponseDto {
 
   private String nickname;
-  private String setInterest;
+  private String feedbackUrl;
 
-  public static UserLoginResponseDto of(String nickname, String setInterest){
-    return new UserLoginResponseDto(nickname, setInterest);
+  public static UserLoginResponseDto of(String nickname, String feedbackUrl) {
+    return new UserLoginResponseDto(nickname, feedbackUrl);
   }
 }

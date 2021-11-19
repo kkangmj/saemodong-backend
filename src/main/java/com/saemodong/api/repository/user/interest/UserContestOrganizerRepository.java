@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserContestOrganizerRepository extends JpaRepository<UserContestOrganizer, Long> {
 
   List<UserContestOrganizer> findAllByUser(User user);
+
+  List<UserContestOrganizer> findAllByUserId(Long userId);
 }

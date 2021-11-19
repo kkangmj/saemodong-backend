@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserExtraDistrictRepository extends JpaRepository<UserExtraDistrict, Long> {
 
   List<UserExtraDistrict> findAllByUser(User user);
+
+  List<UserExtraDistrict> findAllByUserId(Long userId);
 }

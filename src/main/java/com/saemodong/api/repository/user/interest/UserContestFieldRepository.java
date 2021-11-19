@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserContestFieldRepository extends JpaRepository<UserContestField, Long> {
 
   List<UserContestField> findAllByUser(User user);
+
+  List<UserContestField> findAllByUserId(Long userId);
 }

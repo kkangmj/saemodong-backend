@@ -9,8 +9,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ExtraInterestDto {
-  @NotNull private List<Long> type;
-  @NotNull private List<Long> field;
-  @NotNull private List<Long> organizer;
-  @NotNull private List<Long> district;
+  @NotNull private String type;
+  @NotNull private String field;
+  @NotNull private String organizer;
+  @NotNull private String district;
+
+  public static ExtraInterestDto of(String type, String field, String organizer, String district) {
+    return new ExtraInterestDto(type, field, organizer, district);
+  }
 }

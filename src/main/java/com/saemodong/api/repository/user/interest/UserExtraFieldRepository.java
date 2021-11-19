@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserExtraFieldRepository extends JpaRepository<UserExtraField, Long> {
 
-  List<UserExtraField> findAllByUserApiKey(String apiKey);
+  List<UserExtraField> findAllByUserId(Long userId);
 
   List<UserExtraField> findAllByUser(User user);
 }

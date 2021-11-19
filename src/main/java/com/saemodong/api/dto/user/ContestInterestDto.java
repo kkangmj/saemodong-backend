@@ -1,6 +1,5 @@
 package com.saemodong.api.dto.user;
 
-import java.util.List;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,8 +8,12 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ContestInterestDto {
-  @NotNull private List<Long> type;
-  @NotNull private List<Long> field;
-  @NotNull private List<Long> organizer;
-  @NotNull private List<Long> prize;
+  @NotNull private String type;
+  @NotNull private String field;
+  @NotNull private String organizer;
+  @NotNull private String prize;
+
+  public static ContestInterestDto of(String type, String field, String organizer, String prize) {
+    return new ContestInterestDto(type, field, organizer, prize);
+  }
 }

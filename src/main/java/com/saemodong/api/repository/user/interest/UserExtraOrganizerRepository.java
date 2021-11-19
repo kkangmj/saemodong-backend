@@ -9,5 +9,5 @@ public interface UserExtraOrganizerRepository extends JpaRepository<UserExtraOrg
 
   List<UserExtraOrganizer> findAllByUser(User user);
 
-
+  List<UserExtraOrganizer> findAllByUserId(Long userId);
 }

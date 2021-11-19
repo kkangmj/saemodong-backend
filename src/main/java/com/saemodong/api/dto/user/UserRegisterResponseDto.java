@@ -9,8 +9,9 @@ import lombok.Getter;
 public class UserRegisterResponseDto {
   private String nickname;
   private String apiKey;
+  private String feedbackUrl;
 
-  public static UserRegisterResponseDto of(String nickname, String apiKey){
-    return new UserRegisterResponseDto(nickname, apiKey);
+  public static UserRegisterResponseDto of(String nickname, String apiKey) {
+    return new UserRegisterResponseDto(nickname, apiKey, "");
   }
 }
