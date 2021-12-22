@@ -28,13 +28,15 @@ public class User extends BaseTimeEntity {
   @Column(length = 20, nullable = false)
   private String apiKey;
 
-  //  @Column(length = 1, nullable = false)
-  //  @ColumnDefault("'N'")
-  //  private String setInterest;
+  @Column(length = 1, nullable = false)
+  @ColumnDefault("'N'")
+  private String setInterest;
 
   @Column
   @ColumnDefault("''")
   private String feedbackUrl;
+
+  @Column private String fcmToken;
 
   @Column(length = 1, nullable = false)
   @ColumnDefault("'N'")
@@ -49,5 +51,13 @@ public class User extends BaseTimeEntity {
 
   public static User of(String nickname, String apiKey) {
     return new User(nickname, apiKey);
+  }
+
+  public void updateToken(String fcmToken) {
+    this.fcmToken = fcmToken;
+  }
+
+  public void updateSetInterest(String setInterest) {
+    this.setInterest = setInterest;
   }
 }

@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserExtraType {
+public class UserExtraType extends UserActivity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -36,4 +36,5 @@ public class UserExtraType {
   public static UserExtraType of(User user, ExtraType extraType) {
     return new UserExtraType(user, extraType);
   }
+
 }
