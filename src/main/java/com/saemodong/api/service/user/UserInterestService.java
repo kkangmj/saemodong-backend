@@ -2,6 +2,7 @@ package com.saemodong.api.service.user;
 
 import com.saemodong.api.dto.user.ContestInterestDto;
 import com.saemodong.api.dto.user.ExtraInterestDto;
+import com.saemodong.api.model.activity.Activity;
 import com.saemodong.api.model.activity.contest.ContestField;
 import com.saemodong.api.model.activity.contest.ContestOrganizer;
 import com.saemodong.api.model.activity.contest.ContestPrize;
@@ -10,6 +11,8 @@ import com.saemodong.api.model.activity.extra.ExtraDistrict;
 import com.saemodong.api.model.activity.extra.ExtraField;
 import com.saemodong.api.model.activity.extra.ExtraOrganizer;
 import com.saemodong.api.model.activity.extra.ExtraType;
+import com.saemodong.api.model.notification.Notification;
+import com.saemodong.api.model.user.InterestActivityScreen;
 import com.saemodong.api.model.user.User;
 import com.saemodong.api.model.user.interest.UserContestField;
 import com.saemodong.api.model.user.interest.UserContestOrganizer;
@@ -19,6 +22,10 @@ import com.saemodong.api.model.user.interest.UserExtraDistrict;
 import com.saemodong.api.model.user.interest.UserExtraField;
 import com.saemodong.api.model.user.interest.UserExtraOrganizer;
 import com.saemodong.api.model.user.interest.UserExtraType;
+import com.saemodong.api.model.user.interest.UserInterestBaseEntity;
+import com.saemodong.api.repository.NotificationRepository;
+import com.saemodong.api.repository.activity.ActivityCustomRepository;
+import com.saemodong.api.repository.activity.ActivityRepository;
 import com.saemodong.api.repository.activity.contest.ContestFieldRepository;
 import com.saemodong.api.repository.activity.contest.ContestOrganizerRepository;
 import com.saemodong.api.repository.activity.contest.ContestPrizeRepository;
@@ -27,6 +34,7 @@ import com.saemodong.api.repository.activity.extra.ExtraDistrictRepository;
 import com.saemodong.api.repository.activity.extra.ExtraFieldRepository;
 import com.saemodong.api.repository.activity.extra.ExtraOrganizerRepository;
 import com.saemodong.api.repository.activity.extra.ExtraTypeRepository;
+import com.saemodong.api.repository.user.InterestActivityScreenRepository;
 import com.saemodong.api.repository.user.UserRepository;
 import com.saemodong.api.repository.user.interest.UserContestFieldRepository;
 import com.saemodong.api.repository.user.interest.UserContestOrganizerRepository;
@@ -36,13 +44,14 @@ import com.saemodong.api.repository.user.interest.UserExtraDistrictRepository;
 import com.saemodong.api.repository.user.interest.UserExtraFieldRepository;
 import com.saemodong.api.repository.user.interest.UserExtraOrganizerRepository;
 import com.saemodong.api.repository.user.interest.UserExtraTypeRepository;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
@@ -67,106 +76,65 @@ public class UserInterestService {
   private final ContestOrganizerRepository contestOrganizerRepository;
   private final ContestPrizeRepository contestPrizeRepository;
 
+  private final ActivityCustomRepository activityCustomRepository;
+  private final InterestActivityScreenRepository interestActivityScreenRepository;
+  private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
+  private final ActivityRepository activityRepository;
 
   @Transactional
-  public ExtraInterestDto getUserExtraInterest(Long userId) {
+  public ExtraInterestDto getUserExtraInterest(User user) {
 
-    String extraTypeStr = "";
-    String extraFieldStr = "";
-    String extraOrganizerStr = "";
-    String extraDistrictStr = "";
+    List<Long> extraTypes = getExtraTypes(user);
+    String extraTypeStr = joinByDivider(extraTypes);
 
-    List<UserExtraType> userExtraTypes = userExtraTypeRepository.findAllByUserId(userId);
-    List<UserExtraField> userExtraFields = userExtraFieldRepository.findAllByUserId(userId);
-    List<UserExtraOrganizer> userExtraOrganizers =
-        userExtraOrganizerRepository.findAllByUserId(userId);
-    List<UserExtraDistrict> userExtraDistricts =
-        userExtraDistrictRepository.findAllByUserId(userId);
+    List<Long> extraFields = getExtraFields(user);
+    String extraFieldStr = joinByDivider(extraFields);
 
-    if (!userExtraTypes.isEmpty()) {
-      List<String> extraTypes =
-          userExtraTypes.stream()
-              .map(item -> Long.toString(item.getExtraType().getId()))
-              .collect(Collectors.toList());
-      extraTypeStr = String.join("+", extraTypes);
-    }
+    List<Long> extraOrganizers = getExtraOrganizer(user);
+    String extraOrganizerStr = joinByDivider(extraOrganizers);
 
-    if (!userExtraFields.isEmpty()) {
-      List<String> extraFields =
-          userExtraFields.stream()
-              .map(item -> Long.toString(item.getExtraField().getId()))
-              .collect(Collectors.toList());
-      extraFieldStr = String.join("+", extraFields);
-    }
-
-    if (!userExtraOrganizers.isEmpty()) {
-      List<String> extraOrganizers =
-          userExtraOrganizers.stream()
-              .map(item -> Long.toString(item.getExtraOrganizer().getId()))
-              .collect(Collectors.toList());
-      extraOrganizerStr = String.join("+", extraOrganizers);
-    }
-
-    if (!userExtraDistricts.isEmpty()) {
-      List<String> extraDistricts =
-          userExtraDistricts.stream()
-              .map(item -> Long.toString(item.getExtraDistrict().getId()))
-              .collect(Collectors.toList());
-      extraDistrictStr = String.join("+", extraDistricts);
-    }
+    List<Long> extraDistricts = getExtraDistrict(user);
+    String extraDistrictStr = joinByDivider(extraDistricts);
 
     return ExtraInterestDto.of(extraTypeStr, extraFieldStr, extraOrganizerStr, extraDistrictStr);
   }
 
   @Transactional
-  public ContestInterestDto getUserContestInterest(Long userId) {
+  public ContestInterestDto getUserContestInterest(User user) {
 
-    String contestTypeStr = "";
-    String contestFieldStr = "";
-    String contestOrganizerStr = "";
-    String contestPrizeStr = "";
+    List<Long> contestTypes = getContestType(user);
+    String contestTypeStr = joinByDivider(contestTypes);
 
-    List<UserContestType> userContestTypes = userContestTypeRepository.findAllByUserId(userId);
-    List<UserContestField> userContestFields = userContestFieldRepository.findAllByUserId(userId);
-    List<UserContestOrganizer> userContestOrganizers =
-        userContestOrganizerRepository.findAllByUserId(userId);
-    List<UserContestPrize> userContestPrizes = userContestPrizeRepository.findAllByUserId(userId);
+    List<Long> contestFields = getContestField(user);
+    String contestFieldStr = joinByDivider(contestFields);
 
-    if (!userContestTypes.isEmpty()) {
-      List<String> contestTypes =
-          userContestTypes.stream()
-              .map(item -> Long.toString(item.getContestType().getId()))
-              .collect(Collectors.toList());
-      contestTypeStr = String.join("+", contestTypes);
-    }
+    List<Long> contestOrganizers = getContestOrganizer(user);
+    String contestOrganizerStr = joinByDivider(contestOrganizers);
 
-    if (!userContestFields.isEmpty()) {
-      List<String> contestFields =
-          userContestFields.stream()
-              .map(item -> Long.toString(item.getContestField().getId()))
-              .collect(Collectors.toList());
-      contestFieldStr = String.join("+", contestFields);
-    }
-
-    if (!userContestOrganizers.isEmpty()) {
-      List<String> contestOrganizers =
-          userContestOrganizers.stream()
-              .map(item -> Long.toString(item.getContestOrganizer().getId()))
-              .collect(Collectors.toList());
-      contestOrganizerStr = String.join("+", contestOrganizers);
-    }
-
-    if (!userContestPrizes.isEmpty()) {
-      List<String> contestPrizes =
-          userContestPrizes.stream()
-              .map(item -> Long.toString(item.getContestPrize().getId()))
-              .collect(Collectors.toList());
-      contestPrizeStr = String.join("+", contestPrizes);
-    }
+    List<Long> contestPrizes = getContestPrize(user);
+    String contestPrizeStr = joinByDivider(contestPrizes);
 
     return ContestInterestDto.of(
         contestTypeStr, contestFieldStr, contestOrganizerStr, contestPrizeStr);
+  }
+
+  @Transactional
+  public void updateSetInterest(User user) {
+
+    if (userExtraTypeRepository.existsByUser(user)
+        || userExtraFieldRepository.existsByUser(user)
+        || userExtraOrganizerRepository.existsByUser(user)
+        || userExtraDistrictRepository.existsByUser(user)
+        || userContestTypeRepository.existsByUser(user)
+        || userContestFieldRepository.existsByUser(user)
+        || userContestOrganizerRepository.existsByUser(user)
+        || userContestPrizeRepository.existsByUser(user)) {
+      user.updateSetInterest("Y");
+    } else {
+      user.updateSetInterest("N");
+    }
+    userRepository.save(user);
   }
 
   @Transactional
@@ -176,12 +144,13 @@ public class UserInterestService {
     User user = userRepository.findByApiKey(apiKey).get();
 
     // TODO !user.isPresent()인 경우 에러
-    // TODO setInterest 여부 바꿔야 함.
 
     setExtraTypes(user, type);
     setExtraFields(user, field);
     setExtraOrganizers(user, organizer);
     setExtraDistricts(user, district);
+
+    updateSetInterest(user);
   }
 
   @Transactional
@@ -191,19 +160,25 @@ public class UserInterestService {
     User user = userRepository.findByApiKey(apiKey).get();
 
     // TODO !user.isPresent()인 경우 에러
-    // TODO setInterest 여부 바꿔야 함.
 
     setContestTypes(user, type);
     setContestFields(user, field);
     setContestOrganizers(user, organizer);
     setContestPrizes(user, prize);
+
+    updateSetInterest(user);
   }
 
   private List<Long> splitByDivider(String target) {
-
     return Arrays.asList(target.split("\\+")).stream()
         .map(Long::parseLong)
         .collect(Collectors.toList());
+  }
+
+  private String joinByDivider(List<Long> target) {
+    return target.isEmpty()
+        ? ""
+        : String.join("+", target.stream().map(Object::toString).collect(Collectors.toList()));
   }
 
   private void setExtraTypes(User user, String extraTypes) {
@@ -217,6 +192,12 @@ public class UserInterestService {
         extraType.ifPresent(value -> userExtraTypeRepository.save(UserExtraType.of(user, value)));
       }
     }
+  }
+
+  private List<Long> getExtraTypes(User user) {
+    return userExtraTypeRepository.findAllByUser(user).stream()
+        .map(userExtraType -> userExtraType.getExtraType().getId())
+        .collect(Collectors.toList());
   }
 
   private void setExtraFields(User user, String extraFields) {
@@ -233,6 +214,12 @@ public class UserInterestService {
     }
   }
 
+  private List<Long> getExtraFields(User user) {
+    return userExtraFieldRepository.findAllByUser(user).stream()
+        .map(userExtraField -> userExtraField.getExtraField().getId())
+        .collect(Collectors.toList());
+  }
+
   private void setExtraOrganizers(User user, String extraOrganizers) {
     List<UserExtraOrganizer> userExtraOrganizers = userExtraOrganizerRepository.findAllByUser(user);
     userExtraOrganizerRepository.deleteAll(userExtraOrganizers);
@@ -247,6 +234,12 @@ public class UserInterestService {
     }
   }
 
+  private List<Long> getExtraOrganizer(User user) {
+    return userExtraOrganizerRepository.findAllByUser(user).stream()
+        .map(userExtraOrganizer -> userExtraOrganizer.getExtraOrganizer().getId())
+        .collect(Collectors.toList());
+  }
+
   private void setExtraDistricts(User user, String extraDistricts) {
     List<UserExtraDistrict> userExtraDistricts = userExtraDistrictRepository.findAllByUser(user);
     userExtraDistrictRepository.deleteAll(userExtraDistricts);
@@ -259,6 +252,12 @@ public class UserInterestService {
             value -> userExtraDistrictRepository.save(UserExtraDistrict.of(user, value)));
       }
     }
+  }
+
+  private List<Long> getExtraDistrict(User user) {
+    return userExtraDistrictRepository.findAllByUser(user).stream()
+        .map(userExtraDistrict -> userExtraDistrict.getExtraDistrict().getId())
+        .collect(Collectors.toList());
   }
 
   private void setContestTypes(User user, String contestTypes) {
@@ -276,6 +275,12 @@ public class UserInterestService {
     }
   }
 
+  private List<Long> getContestType(User user) {
+    return userContestTypeRepository.findAllByUser(user).stream()
+        .map(userContestType -> userContestType.getContestType().getId())
+        .collect(Collectors.toList());
+  }
+
   private void setContestFields(User user, String contestFields) {
     List<UserContestField> userContestFields = userContestFieldRepository.findAllByUser(user);
     userContestFieldRepository.deleteAll(userContestFields);
@@ -288,6 +293,12 @@ public class UserInterestService {
             value -> userContestFieldRepository.save(UserContestField.of(user, value)));
       }
     }
+  }
+
+  private List<Long> getContestField(User user) {
+    return userContestFieldRepository.findAllByUser(user).stream()
+        .map(userContestField -> userContestField.getContestField().getId())
+        .collect(Collectors.toList());
   }
 
   private void setContestOrganizers(User user, String contestOrganizers) {
@@ -306,6 +317,12 @@ public class UserInterestService {
     }
   }
 
+  private List<Long> getContestOrganizer(User user) {
+    return userContestOrganizerRepository.findAllByUser(user).stream()
+        .map(userContestOrganizer -> userContestOrganizer.getContestOrganizer().getId())
+        .collect(Collectors.toList());
+  }
+
   private void setContestPrizes(User user, String contestPrizes) {
     List<UserContestPrize> userContestPrizes = userContestPrizeRepository.findAllByUser(user);
     userContestPrizeRepository.deleteAll(userContestPrizes);
@@ -318,5 +335,11 @@ public class UserInterestService {
             value -> userContestPrizeRepository.save(UserContestPrize.of(user, value)));
       }
     }
+  }
+
+  private List<Long> getContestPrize(User user) {
+    return userContestPrizeRepository.findAllByUser(user).stream()
+        .map(userContestPrize -> userContestPrize.getContestPrize().getId())
+        .collect(Collectors.toList());
   }
 }

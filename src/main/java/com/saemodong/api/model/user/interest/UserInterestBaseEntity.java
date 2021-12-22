@@ -5,4 +5,4 @@ import lombok.Getter;
 
 @MappedSuperclass
 @Getter
-public abstract class UserActivityCondition {}
+public abstract class UserInterestBaseEntity {}

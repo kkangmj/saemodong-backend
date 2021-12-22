@@ -1,6 +1,7 @@
 package com.saemodong.api.repository.activity;
 
 import com.saemodong.api.model.activity.Activity;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
@@ -9,6 +10,7 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.jni.Local;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -34,6 +36,22 @@ public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
   }
 
   @Override
+  public List<Activity> findExtraBy(
+      LocalDateTime startDateTime,
+      LocalDateTime endDateTime,
+      List<Long> typeId,
+      List<Long> fieldId,
+      List<Long> districtId,
+      List<Long> organizerId) {
+
+    String jpql =
+        getExtraNativeQuery(startDateTime, endDateTime, typeId, fieldId, districtId, organizerId);
+    Query query = em.createNativeQuery(jpql, Activity.class);
+
+    return query.setMaxResults(100).getResultList();
+  }
+
+  @Override
   public List<Activity> findContestBy(
       Integer page,
       String sorter,
@@ -46,6 +64,22 @@ public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
     Query query = em.createNativeQuery(jpql, Activity.class);
 
     return query.setFirstResult(0 + page * 10).setMaxResults(10).getResultList();
+  }
+
+  @Override
+  public List<Activity> findContestBy(
+      LocalDateTime startDateTime,
+      LocalDateTime endDateTime,
+      List<Long> typeId,
+      List<Long> fieldId,
+      List<Long> organizerId,
+      List<Long> prizeId) {
+
+    String jpql =
+        getContestNativeQuery(startDateTime, endDateTime, typeId, fieldId, organizerId, prizeId);
+    Query query = em.createNativeQuery(jpql, Activity.class);
+
+    return query.setMaxResults(100).getResultList();
   }
 
   public Integer getExtraTotalPage(
@@ -76,13 +110,8 @@ public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
     return (int) Math.ceil(query.getResultList().size() / 10d);
   }
 
-  private String getExtraNativeQuery(
-      String sorter,
-      List<Long> typeId,
-      List<Long> fieldId,
-      List<Long> districtId,
-      List<Long> organizerId) {
-
+  private String getFilteredExtraQuery(
+      List<Long> typeId, List<Long> fieldId, List<Long> districtId, List<Long> organizerId) {
     String sql1 =
         "select distinct activity.id, activity.name, activity.type, activity.url, activity.opened_at, activity.closed_at, activity.is_deleted, activity.deleted_at, activity.created_at, activity.updated_at from activity";
     String sql2 = "";
@@ -127,6 +156,17 @@ public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
     }
 
     String jpql = sql1 + sql2;
+    return jpql;
+  }
+
+  private String getExtraNativeQuery(
+      String sorter,
+      List<Long> typeId,
+      List<Long> fieldId,
+      List<Long> districtId,
+      List<Long> organizerId) {
+
+    String jpql = getFilteredExtraQuery(typeId, fieldId, districtId, organizerId);
 
     if (sorter.equals("latestAsc")) {
       jpql +=
@@ -139,13 +179,27 @@ public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
     return jpql;
   }
 
-  private String getContestNativeQuery(
-      String sorter,
+  private String getExtraNativeQuery(
+      LocalDateTime startDateTime,
+      LocalDateTime endDateTime,
       List<Long> typeId,
       List<Long> fieldId,
-      List<Long> organizerId,
-      List<Long> prizeId) {
+      List<Long> districtId,
+      List<Long> organizerId) {
 
+    String jpql = getFilteredExtraQuery(typeId, fieldId, districtId, organizerId);
+
+    jpql +=
+        " where activity.is_deleted='N' and activity.type=0 and activity.created_at between "
+            + startDateTime
+            + " and "
+            + endDateTime;
+
+    return jpql;
+  }
+
+  private String getFilteredContestQuery(
+      List<Long> typeId, List<Long> fieldId, List<Long> organizerId, List<Long> prizeId) {
     String sql1 =
         "select distinct activity.id, activity.name, activity.type, activity.url, activity.opened_at, activity.closed_at, activity.is_deleted, activity.deleted_at, activity.created_at, activity.updated_at from activity";
     String sql2 = "";
@@ -191,6 +245,17 @@ public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
     }
 
     String jpql = sql1 + sql2;
+    return jpql;
+  }
+
+  private String getContestNativeQuery(
+      String sorter,
+      List<Long> typeId,
+      List<Long> fieldId,
+      List<Long> organizerId,
+      List<Long> prizeId) {
+
+    String jpql = getFilteredContestQuery(typeId, fieldId, organizerId, prizeId);
 
     if (sorter.equals("latestAsc")) {
       jpql +=
@@ -199,6 +264,25 @@ public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
       jpql +=
           " where date_format(activity.closed_at, '%Y-%m-%d') > curdate() and activity.is_deleted='N' and activity.type=1 order by activity.closed_at asc";
     }
+
+    return jpql;
+  }
+
+  private String getContestNativeQuery(
+      LocalDateTime startDateTime,
+      LocalDateTime endDateTime,
+      List<Long> typeId,
+      List<Long> fieldId,
+      List<Long> organizerId,
+      List<Long> prizeId) {
+
+    String jpql = getFilteredContestQuery(typeId, fieldId, organizerId, prizeId);
+
+    jpql +=
+        " where activity.is_deleted='N' and activityS.type=1 and activity.created_at between "
+            + startDateTime
+            + " and "
+            + endDateTime;
 
     return jpql;
   }
