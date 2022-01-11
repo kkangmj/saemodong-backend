@@ -1,20 +1,16 @@
 package com.saemodong.api.service.activity;
 
+import com.saemodong.api.common.DividerHelper;
 import com.saemodong.api.dto.activity.ActivityResponseDto;
 import com.saemodong.api.mapper.ActivityFieldMapper;
 import com.saemodong.api.mapper.ActivityMapper;
-import com.saemodong.api.model.BookmarkType;
 import com.saemodong.api.model.activity.Activity;
-import com.saemodong.api.repository.BookmarkRepository;
 import com.saemodong.api.repository.activity.ActivityCustomRepositoryImpl;
 import com.saemodong.api.repository.activity.ActivityRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +26,7 @@ public class ActivityService {
   private final ActivityFieldMapper activityFieldMapper;
   private final ActivityCustomRepositoryImpl activityCustomRepositoryImpl;
   private final ActivityMapper activityMapper;
+  private final DividerHelper dividerHelper;
 
   public Pageable getPageable(Integer page, String sorter) {
     if (sorter.equals("latestAsc")) {
@@ -88,23 +85,10 @@ public class ActivityService {
       String district,
       String apiKey) {
 
-    List<Long> typeId = new ArrayList<>();
-    List<Long> fieldId = new ArrayList<>();
-    List<Long> organizerId = new ArrayList<>();
-    List<Long> districtId = new ArrayList<>();
-
-    if (!type.isEmpty()) {
-      typeId = splitByDivider(type);
-    }
-    if (!field.isEmpty()) {
-      fieldId = splitByDivider(field);
-    }
-    if (!organizer.isEmpty()) {
-      organizerId = splitByDivider(organizer);
-    }
-    if (!district.isEmpty()) {
-      districtId = splitByDivider(district);
-    }
+    List<Long> typeId = dividerHelper.splitByDivider(type);
+    List<Long> fieldId = dividerHelper.splitByDivider(field);
+    List<Long> organizerId = dividerHelper.splitByDivider(organizer);
+    List<Long> districtId = dividerHelper.splitByDivider(district);
 
     List<ActivityResponseDto> result =
         activityMapper.toActivityResponseDto(
@@ -128,23 +112,10 @@ public class ActivityService {
       String prize,
       String apiKey) {
 
-    List<Long> typeId = new ArrayList<>();
-    List<Long> fieldId = new ArrayList<>();
-    List<Long> organizerId = new ArrayList<>();
-    List<Long> prizeId = new ArrayList<>();
-
-    if (!type.isEmpty()) {
-      typeId = splitByDivider(type);
-    }
-    if (!field.isEmpty()) {
-      fieldId = splitByDivider(field);
-    }
-    if (!organizer.isEmpty()) {
-      organizerId = splitByDivider(organizer);
-    }
-    if (!prize.isEmpty()) {
-      prizeId = splitByDivider(prize);
-    }
+    List<Long> typeId = dividerHelper.splitByDivider(type);
+    List<Long> fieldId = dividerHelper.splitByDivider(field);
+    List<Long> organizerId = dividerHelper.splitByDivider(organizer);
+    List<Long> prizeId = dividerHelper.splitByDivider(prize);
 
     List<ActivityResponseDto> result =
         activityMapper.toActivityResponseDto(
@@ -157,12 +128,5 @@ public class ActivityService {
         activityCustomRepositoryImpl.getContestTotalPage(
             sorter, typeId, fieldId, organizerId, prizeId),
         result);
-  }
-
-  private List<Long> splitByDivider(String target) {
-
-    return Arrays.asList(target.split("\\+")).stream()
-        .map(Long::parseLong)
-        .collect(Collectors.toList());
   }
 }
