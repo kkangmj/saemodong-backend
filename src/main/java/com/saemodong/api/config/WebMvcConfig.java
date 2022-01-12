@@ -16,7 +16,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
 
-    String[] path = {"/api/v1/activity/**", "/api/v1/bookmark/**", "/api/v1/notification/**"};
+    String[] path = {
+      "/api/v1/activity/**",
+      "/api/v1/user/interest/**",
+      "/api/v1/bookmark/**",
+      "/api/v1/notification/**"
+    };
 
     registry.addInterceptor(new KeyInterceptor(keyHelper)).addPathPatterns(path);
   }

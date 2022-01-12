@@ -1,5 +1,6 @@
-package com.saemodong.api.model.user;
+package com.saemodong.api.model.view;
 
+import com.saemodong.api.model.user.User;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class InterestActivityScreen {
+public class InterestActivityView {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -26,7 +27,7 @@ public class InterestActivityScreen {
   @JoinColumn(name = "userId")
   private User user;
 
-  private InterestActivityScreen(User user, LocalDateTime lastVisitedAt) {
+  private InterestActivityView(User user, LocalDateTime lastVisitedAt) {
     this.lastVisitedAt = lastVisitedAt;
     this.user = user;
   }
@@ -35,7 +36,7 @@ public class InterestActivityScreen {
     this.lastVisitedAt = localDateTime;
   }
 
-  public static InterestActivityScreen of(User user, LocalDateTime lastVisitedAt) {
-    return new InterestActivityScreen(user, lastVisitedAt);
+  public static InterestActivityView of(User user, LocalDateTime lastVisitedAt) {
+    return new InterestActivityView(user, lastVisitedAt);
   }
 }

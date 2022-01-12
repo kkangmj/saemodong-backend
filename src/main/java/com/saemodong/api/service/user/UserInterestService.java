@@ -2,15 +2,9 @@ package com.saemodong.api.service.user;
 
 import com.saemodong.api.dto.user.ContestInterestDto;
 import com.saemodong.api.dto.user.ExtraInterestDto;
-import com.saemodong.api.model.activity.Activity;
-import com.saemodong.api.model.notification.Notification;
-import com.saemodong.api.model.user.InterestActivityScreen;
+import com.saemodong.api.exception.UserNotFoundException;
 import com.saemodong.api.model.user.User;
-import com.saemodong.api.repository.NotificationRepository;
-import com.saemodong.api.repository.activity.ActivityCustomRepository;
-import com.saemodong.api.repository.activity.ActivityRepository;
 import com.saemodong.api.repository.user.UserRepository;
-import com.saemodong.api.repository.view.InterestActivityRepository;
 import com.saemodong.api.service.user.interest.ContestFieldService;
 import com.saemodong.api.service.user.interest.ContestOrganizerService;
 import com.saemodong.api.service.user.interest.ContestPrizeService;
@@ -19,15 +13,12 @@ import com.saemodong.api.service.user.interest.ExtraDistrictService;
 import com.saemodong.api.service.user.interest.ExtraFieldService;
 import com.saemodong.api.service.user.interest.ExtraOrganizerService;
 import com.saemodong.api.service.user.interest.ExtraTypeService;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import javax.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Service
 public class UserInterestService {
 
@@ -41,14 +32,13 @@ public class UserInterestService {
   private final ContestOrganizerService contestOrganizerService;
   private final ContestPrizeService contestPrizeService;
 
-  private final ActivityCustomRepository activityCustomRepository;
-  private final InterestActivityRepository interestActivityScreenRepository;
-  private final NotificationRepository notificationRepository;
   private final UserRepository userRepository;
-  private final ActivityRepository activityRepository;
 
   @Transactional
-  public ExtraInterestDto getUserExtraInterest(User user) {
+  public ExtraInterestDto getUserExtraInterest(String apiKey) {
+
+    User user =
+        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
 
     String extraTypeStr = extraTypeService.getConditionStr(user);
     String extraFieldStr = extraFieldService.getConditionStr(user);
@@ -59,7 +49,10 @@ public class UserInterestService {
   }
 
   @Transactional
-  public ContestInterestDto getUserContestInterest(User user) {
+  public ContestInterestDto getUserContestInterest(String apiKey) {
+
+    User user =
+        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
 
     String contestTypeStr = contestTypeService.getConditionStr(user);
     String contestFieldStr = contestFieldService.getConditionStr(user);
@@ -92,9 +85,8 @@ public class UserInterestService {
   public void setUserExtraInterest(
       String apiKey, String type, String field, String organizer, String district) {
 
-    User user = userRepository.findByApiKey(apiKey).get();
-
-    // TODO !user.isPresent()인 경우 에러
+    User user =
+        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
 
     extraTypeService.setCondition(user, type);
     extraFieldService.setCondition(user, field);
@@ -108,9 +100,8 @@ public class UserInterestService {
   public void setUserContestInterest(
       String apiKey, String type, String field, String organizer, String prize) {
 
-    User user = userRepository.findByApiKey(apiKey).get();
-
-    // TODO !user.isPresent()인 경우 에러
+    User user =
+        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
 
     contestTypeService.setCondition(user, type);
     contestFieldService.setCondition(user, field);
@@ -118,10 +109,5 @@ public class UserInterestService {
     contestPrizeService.setCondition(user, prize);
 
     updateSetInterest(user);
-  }
-
-
-      }
-    }
   }
 }

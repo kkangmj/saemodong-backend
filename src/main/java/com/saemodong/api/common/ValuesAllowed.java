@@ -1,4 +1,4 @@
-package com.saemodong.api.controller.activity;
+package com.saemodong.api.common;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

@@ -6,12 +6,12 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserRegisterResponseDto {
+public class UserLoginDto {
+
   private String nickname;
-  private String apiKey;
   private String setInterest;
 
-  public static UserRegisterResponseDto of(String nickname, String apiKey, String setInterest) {
-    return new UserRegisterResponseDto(nickname, apiKey, setInterest);
+  public static UserLoginDto of(String nickname, String setInterest) {
+    return new UserLoginDto(nickname, setInterest);
   }
 }

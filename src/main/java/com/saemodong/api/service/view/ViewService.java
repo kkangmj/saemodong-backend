@@ -4,7 +4,7 @@ import static org.springframework.data.util.Optionals.ifPresentOrElse;
 
 import com.saemodong.api.common.LocalDateTimeFormatter;
 import com.saemodong.api.exception.UserNotFoundException;
-import com.saemodong.api.model.user.InterestActivityScreen;
+import com.saemodong.api.model.view.InterestActivityView;
 import com.saemodong.api.model.user.User;
 import com.saemodong.api.repository.user.UserRepository;
 import com.saemodong.api.repository.view.InterestActivityRepository;
@@ -50,6 +50,6 @@ public class ViewService {
           screen.updateLastVisitedAt(localDateTime);
           interestActivityRepository.save(screen);
         },
-        () -> interestActivityRepository.save(InterestActivityScreen.of(user, localDateTime)));
+        () -> interestActivityRepository.save(InterestActivityView.of(user, localDateTime)));
   }
 }
