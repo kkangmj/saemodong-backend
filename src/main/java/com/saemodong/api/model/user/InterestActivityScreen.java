@@ -26,16 +26,16 @@ public class InterestActivityScreen {
   @JoinColumn(name = "userId")
   private User user;
 
-  private InterestActivityScreen(LocalDateTime lastVisitedAt, User user) {
+  private InterestActivityScreen(User user, LocalDateTime lastVisitedAt) {
     this.lastVisitedAt = lastVisitedAt;
     this.user = user;
   }
 
-  public static InterestActivityScreen of(LocalDateTime lastVisitedAt, User user) {
-    return new InterestActivityScreen(lastVisitedAt, user);
+  public void updateLastVisitedAt(LocalDateTime localDateTime) {
+    this.lastVisitedAt = localDateTime;
   }
 
-  public void updateLastVisitedAt(LocalDateTime lastVisitedAt) {
-    this.lastVisitedAt = lastVisitedAt;
+  public static InterestActivityScreen of(User user, LocalDateTime lastVisitedAt) {
+    return new InterestActivityScreen(user, lastVisitedAt);
   }
 }
