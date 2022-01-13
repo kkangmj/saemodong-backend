@@ -1,5 +1,6 @@
 package com.saemodong.api.common;
 
+import com.saemodong.api.exception.UserNotFoundException;
 import com.saemodong.api.model.user.User;
 import com.saemodong.api.repository.user.UserRepository;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class KeyHelper {
+
   private final UserRepository userRepository;
 
   public boolean validate(String apiKey) {
@@ -40,5 +42,11 @@ public class KeyHelper {
       }
     }
     return new String(tmp);
+  }
+
+  public User getUser(String apiKey) {
+    User user =
+        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
+    return user;
   }
 }

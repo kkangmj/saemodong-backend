@@ -1,8 +1,8 @@
 package com.saemodong.api.service.user;
 
+import com.saemodong.api.common.KeyHelper;
 import com.saemodong.api.dto.user.ContestInterestDto;
 import com.saemodong.api.dto.user.ExtraInterestDto;
-import com.saemodong.api.exception.UserNotFoundException;
 import com.saemodong.api.model.user.User;
 import com.saemodong.api.repository.user.UserRepository;
 import com.saemodong.api.service.user.interest.ContestFieldService;
@@ -26,19 +26,17 @@ public class UserInterestService {
   private final ExtraFieldService extraFieldService;
   private final ExtraOrganizerService extraOrganizerService;
   private final ExtraDistrictService extraDistrictService;
-
   private final ContestTypeService contestTypeService;
   private final ContestFieldService contestFieldService;
   private final ContestOrganizerService contestOrganizerService;
   private final ContestPrizeService contestPrizeService;
 
   private final UserRepository userRepository;
+  private final KeyHelper keyHelper;
 
-  @Transactional
   public ExtraInterestDto getUserExtraInterest(String apiKey) {
 
-    User user =
-        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
+    User user = keyHelper.getUser(apiKey);
 
     String extraTypeStr = extraTypeService.getConditionStr(user);
     String extraFieldStr = extraFieldService.getConditionStr(user);
@@ -48,11 +46,9 @@ public class UserInterestService {
     return ExtraInterestDto.of(extraTypeStr, extraFieldStr, extraOrganizerStr, extraDistrictStr);
   }
 
-  @Transactional
   public ContestInterestDto getUserContestInterest(String apiKey) {
 
-    User user =
-        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
+    User user = keyHelper.getUser(apiKey);
 
     String contestTypeStr = contestTypeService.getConditionStr(user);
     String contestFieldStr = contestFieldService.getConditionStr(user);
@@ -61,6 +57,32 @@ public class UserInterestService {
 
     return ContestInterestDto.of(
         contestTypeStr, contestFieldStr, contestOrganizerStr, contestPrizeStr);
+  }
+
+  public void setUserExtraInterest(
+      String apiKey, String type, String field, String organizer, String district) {
+
+    User user = keyHelper.getUser(apiKey);
+
+    extraTypeService.setCondition(user, type);
+    extraFieldService.setCondition(user, field);
+    extraOrganizerService.setCondition(user, organizer);
+    extraDistrictService.setCondition(user, district);
+
+    updateSetInterest(user);
+  }
+
+  public void setUserContestInterest(
+      String apiKey, String type, String field, String organizer, String prize) {
+
+    User user = keyHelper.getUser(apiKey);
+
+    contestTypeService.setCondition(user, type);
+    contestFieldService.setCondition(user, field);
+    contestOrganizerService.setCondition(user, organizer);
+    contestPrizeService.setCondition(user, prize);
+
+    updateSetInterest(user);
   }
 
   @Transactional
@@ -79,35 +101,5 @@ public class UserInterestService {
       user.updateSetInterest("N");
     }
     userRepository.save(user);
-  }
-
-  @Transactional
-  public void setUserExtraInterest(
-      String apiKey, String type, String field, String organizer, String district) {
-
-    User user =
-        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
-
-    extraTypeService.setCondition(user, type);
-    extraFieldService.setCondition(user, field);
-    extraOrganizerService.setCondition(user, organizer);
-    extraDistrictService.setCondition(user, district);
-
-    updateSetInterest(user);
-  }
-
-  @Transactional
-  public void setUserContestInterest(
-      String apiKey, String type, String field, String organizer, String prize) {
-
-    User user =
-        userRepository.findByApiKey(apiKey).orElseThrow(() -> new UserNotFoundException(apiKey));
-
-    contestTypeService.setCondition(user, type);
-    contestFieldService.setCondition(user, field);
-    contestOrganizerService.setCondition(user, organizer);
-    contestPrizeService.setCondition(user, prize);
-
-    updateSetInterest(user);
   }
 }
