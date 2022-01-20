@@ -3,8 +3,9 @@ package com.saemodong.api.controller.user;
 import com.saemodong.api.dto.ApiResponse;
 import com.saemodong.api.dto.SuccessResponse;
 import com.saemodong.api.dto.user.UserLoginDto;
-import com.saemodong.api.dto.user.UserRegisterDto;
-import com.saemodong.api.dto.user.UserRequestDto;
+import com.saemodong.api.dto.user.UserRegisterResponseDto;
+import com.saemodong.api.dto.user.UserRegisterRequestDto;
+
 import com.saemodong.api.service.user.UserService;
 import javax.validation.Valid;
 import lombok.AccessLevel;
@@ -28,10 +29,10 @@ public class UserController {
 
   @PostMapping("register")
   public ResponseEntity<? extends ApiResponse> register(
-      @RequestBody @Valid UserRequestDto userRequestDto) {
+      @RequestBody @Valid UserRegisterRequestDto userRequestDto) {
 
     String nickname = userRequestDto.getNickname().trim();
-    UserRegisterDto userRegisterDto = userService.registerByNickname(nickname);
+    UserRegisterResponseDto userRegisterDto = userService.registerByNickname(nickname);
 
     return ResponseEntity.ok(SuccessResponse.of(userRegisterDto));
   }

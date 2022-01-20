@@ -23,7 +23,7 @@ public class UserInterestController {
 
   private UserInterestService userInterestService;
 
-  @GetMapping("interest/extra")
+  @GetMapping("extra")
   public ResponseEntity<? extends ApiResponse> getExtraInterest(@RequestParam String apiKey) {
 
     ExtraInterestDto extraInterestDto = userInterestService.getUserExtraInterest(apiKey);
@@ -31,14 +31,14 @@ public class UserInterestController {
     return ResponseEntity.ok(SuccessResponse.of(extraInterestDto));
   }
 
-  @GetMapping("interest/contest")
+  @GetMapping("contest")
   public ResponseEntity<? extends ApiResponse> getContestInterest(@RequestParam String apiKey) {
 
     ContestInterestDto contestInterestDto = userInterestService.getUserContestInterest(apiKey);
     return ResponseEntity.ok(SuccessResponse.of(contestInterestDto));
   }
 
-  @PutMapping("interest/extra")
+  @PutMapping("extra")
   public ResponseEntity<? extends ApiResponse> setExtraInterest(
       @RequestParam String apiKey, @RequestBody @Valid ExtraInterestDto extraInterestDto) {
 
@@ -52,7 +52,7 @@ public class UserInterestController {
     return ResponseEntity.noContent().build();
   }
 
-  @PutMapping("interest/contest")
+  @PutMapping("contest")
   public ResponseEntity<? extends ApiResponse> setContestInterest(
       @RequestParam String apiKey, @RequestBody @Valid ContestInterestDto contestInterestDto) {
 

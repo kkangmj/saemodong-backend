@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class UserRequestDto {
+public class UserRegisterRequestDto {
 
   @NotBlank
   @Size(min=1, max=15)

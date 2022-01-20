@@ -17,10 +17,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
   public void addInterceptors(InterceptorRegistry registry) {
 
     String[] path = {
-      "/api/v1/activity/**",
-      "/api/v1/user/interest/**",
-      "/api/v1/bookmark/**",
-      "/api/v1/notification/**"
+      "/api/v1/activity/**", "/api/v1/user/**", "/api/v1/bookmark/**", "/api/v1/notification/**"
     };
 
     registry.addInterceptor(new KeyInterceptor(keyHelper)).addPathPatterns(path);

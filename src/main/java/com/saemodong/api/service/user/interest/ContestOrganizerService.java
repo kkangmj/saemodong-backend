@@ -19,6 +19,7 @@ public class ContestOrganizerService extends ActivityCondition {
   private final UserContestOrganizerRepository userContestOrganizerRepository;
   private final ContestOrganizerRepository contestOrganizerRepository;
 
+
   @Override
   public boolean existsByUser(User user) {
     return userContestOrganizerRepository.existsByUser(user);

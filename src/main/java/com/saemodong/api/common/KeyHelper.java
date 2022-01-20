@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 public class KeyHelper {
 
   private final UserRepository userRepository;
+  private final Integer KEY_LENGTH = 15;
 
   public boolean validate(String apiKey) {
     Optional<User> user = userRepository.findByApiKey(apiKey);
@@ -20,9 +21,9 @@ public class KeyHelper {
   }
 
   public String getApiKey() {
-    String apiKey = generateApiKey(15);
+    String apiKey = generateApiKey(KEY_LENGTH);
     while (checkIfExist(apiKey)) {
-      apiKey = generateApiKey(15);
+      apiKey = generateApiKey(KEY_LENGTH);
     }
     return apiKey;
   }
@@ -42,6 +43,10 @@ public class KeyHelper {
       }
     }
     return new String(tmp);
+  }
+
+  public Integer getKeyLength() {
+    return KEY_LENGTH;
   }
 
   public User getUser(String apiKey) {

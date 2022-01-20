@@ -13,6 +13,11 @@ public class BadRequestException extends RuntimeException {
     this.resultCode = ResultCode.BAD_REQUEST;
   }
 
+  public BadRequestException(String message) {
+    super(message);
+    this.resultCode = ResultCode.BAD_REQUEST;
+  }
+
   public BadRequestException(ResultCode resultCode, String message) {
     super(message);
     this.resultCode = resultCode;

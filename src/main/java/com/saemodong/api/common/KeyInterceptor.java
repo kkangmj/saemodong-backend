@@ -17,11 +17,12 @@ public class KeyInterceptor implements HandlerInterceptor {
   public boolean preHandle(
       HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) {
 
-    String apiKey = request.getParameter("apiKey");
+    String apiKey = request.getParameter("apiKey").trim();
 
-    if (apiKey.isEmpty()) {
-      throw new BadRequestException();
+    if (apiKey.isEmpty() || apiKey.length() != keyHelper.getKeyLength()) {
+      throw new BadRequestException("유효하지 않은 key 값입니다.");
     }
+
     if (keyHelper.validate(apiKey)) {
       return true;
     } else {
