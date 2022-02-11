@@ -2,11 +2,13 @@ package com.saemodong.api.controller.activity;
 
 import com.saemodong.api.common.ValuesAllowed;
 import com.saemodong.api.dto.ApiResponse;
+import com.saemodong.api.dto.PaginationResponseDto;
 import com.saemodong.api.dto.SuccessResponse;
-import com.saemodong.api.model.BookmarkType;
-import com.saemodong.api.service.BookmarkService;
-import com.saemodong.api.service.activity.ActivityPageResponse;
+import com.saemodong.api.model.bookmark.BookmarkType;
 import com.saemodong.api.service.activity.ActivityService;
+import com.saemodong.api.service.bookmark.BookmarkService;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,22 +31,22 @@ public class ActivityController {
   @GetMapping("")
   public ResponseEntity<? extends ApiResponse> getActivity(
       @RequestParam String apiKey,
-      @RequestParam Integer page,
-      @ValuesAllowed(
+      @RequestParam @NotNull @Min(value = 0) Integer pageNumber,
+      @RequestParam(defaultValue = "latestAsc")
+          @ValuesAllowed(
               propName = "sorter",
               values = {"latestAsc", "ddayAsc"})
-          @RequestParam(required = false, defaultValue = "latestAsc")
           String sorter,
-      @ValuesAllowed(
-              propName = "isToday",
+      @RequestParam(defaultValue = "N")
+          @ValuesAllowed(
+              propName = "registeredToday",
               values = {"Y", "N"})
-          @RequestParam(required = false, defaultValue = "N")
-          String isToday) {
+          String registeredToday) {
 
-    ActivityPageResponse activityPageResponse =
-        activityService.getActivityList(page, sorter, isToday, apiKey);
+    PaginationResponseDto activityInSinglePage =
+        activityService.getActivityWithPageNumber(pageNumber, sorter, registeredToday, apiKey);
 
-    return ResponseEntity.ok(SuccessResponse.of(activityPageResponse));
+    return ResponseEntity.ok(SuccessResponse.of(activityInSinglePage));
   }
 
   @GetMapping("/extra")
@@ -61,11 +63,11 @@ public class ActivityController {
       @RequestParam(required = false, defaultValue = "") String organizer,
       @RequestParam(required = false, defaultValue = "") String district) {
 
-    ActivityPageResponse activityPageResponse =
+    PaginationResponseDto activityPaginationResponse =
         activityService.getActivityExtraList(
             page, sorter, type, field, organizer, district, apiKey);
 
-    return ResponseEntity.ok(SuccessResponse.of(activityPageResponse));
+    return ResponseEntity.ok(SuccessResponse.of(activityPaginationResponse));
   }
 
   @GetMapping("/contest")
@@ -82,7 +84,7 @@ public class ActivityController {
       @RequestParam(required = false, defaultValue = "") String organizer,
       @RequestParam(required = false, defaultValue = "") String prize) {
 
-    ActivityPageResponse activityPageResponse =
+    PaginationResponseDto activityPageResponse =
         activityService.getActivityContestList(page, sorter, type, field, organizer, prize, apiKey);
 
     return ResponseEntity.ok(SuccessResponse.of(activityPageResponse));

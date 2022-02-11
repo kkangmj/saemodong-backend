@@ -1,24 +1,73 @@
 package com.saemodong.api.repository.activity;
 
 import com.saemodong.api.model.activity.Activity;
+import com.saemodong.api.service.activity.ActivitySorter;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.jni.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
 @Transactional
 @Getter
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ActivityCustomRepositoryImpl implements ActivityCustomRepository {
 
+  private final Integer PAGE_SIZE = 10;
+  private final ActivityRepository activityRepository;
   @PersistenceContext private EntityManager em;
+
+  @Override
+  public Page<Activity> getActivityBy(Integer pageNumber, String sorter, String registeredToday) {
+    Pageable pageable = getPageable(pageNumber, sorter);
+    return getPage(pageable, sorter, registeredToday);
+  }
+
+  private Pageable getPageable(Integer pageNumber, String sorter) {
+    Sort sort = ActivitySorter.fromSorter(sorter).getSort();
+    return PageRequest.of(pageNumber, PAGE_SIZE, sort);
+  }
+
+  private Page<Activity> getPage(Pageable pageable, String sorter, String registeredToday) {
+    if (sorter.equals("latestAsc") && registeredToday.equals("N")) {
+      // sorter: 최신 등록순, isToday: N
+      return activityRepository.findAllByIsDeleted(pageable, "N");
+
+    } else if (sorter.equals("latestAsc") && registeredToday.equals("Y")) {
+      // sorter: 최신 등록순, isToday: Y
+      LocalDateTime startDate =
+          LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(20, 0, 0, 0));
+      LocalDateTime endDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59, 59));
+      return activityRepository.findAllByIsDeletedAndCreatedAtBetween(
+          pageable, "N", startDate, endDate);
+    } else if (sorter.equals("ddayAsc") && registeredToday.equals("N")) {
+      // sorter: 마감일순, isToday: N
+      LocalDateTime startDate = LocalDateTime.now();
+      return activityRepository.findAllByIsDeletedAndClosedAtAfter(pageable, "N", startDate);
+    } else {
+      // sorter: 마감일순, isToday: Y
+      LocalDateTime startDate =
+          LocalDateTime.of(LocalDate.now().minusDays(1), LocalTime.of(20, 0, 0));
+      LocalDateTime endDate = LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
+
+      return activityRepository.findAllByIsDeletedAndCreatedAtBetween(
+          pageable, "N", startDate, endDate);
+    }
+  }
 
   @Override
   public List<Activity> findExtraBy(
