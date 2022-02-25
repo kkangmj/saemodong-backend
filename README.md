@@ -1,9 +1,5 @@
 # 🔮 세모동 - BackEnd
 
-### 📌 소개
-
-
-
 <p align="center">
   <img alt="세모동 소개" src="https://user-images.githubusercontent.com/52561963/155659419-f79dc598-8711-404b-9d3d-3c2a55de820a.png" width="650">
 </p>
@@ -20,9 +16,6 @@
 
 <br>
 
-
-<br>
-
 ## ⚙ 기술 스택
 
 - Java
@@ -34,7 +27,7 @@
 
 <br>
 
-### 🏷️ 기능 명세서
+## 🏷️ 기능 명세서
 
 <img alt="기능명세서" src="https://user-images.githubusercontent.com/52561963/155674563-0f6b7bce-a16c-4a31-bda2-4d6de079b348.png" width="500" />
 
@@ -58,4 +51,4 @@
 
 ## Link
 
-[FrontEnd Repository](https://github.com/saemodong/saemodong-frontend)
+[➡ FrontEnd Repository](https://github.com/saemodong/saemodong-frontend)
