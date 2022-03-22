@@ -20,10 +20,11 @@
 
 - Java
 - Spring Boot
-- Spring Data JPA + QueryDSL
+- Spring Data JPA
 - MySQL
 - Gradle
 - Swagger
+- AWS EC2, RDS
 
 <br>
 
@@ -39,13 +40,13 @@
 
 <img alt="erd" src="https://user-images.githubusercontent.com/52561963/155675391-2306ea8d-ff1d-456f-a0c8-e13ffff29395.png" width="500" />
 
-[<u>➡ 자세히 보기</u>](https://drive.google.com/file/d/1-A3mnAe334fDosN1lqDcWVGswNYsrmCj/view?usp=sharing)
 
 <br>
 
 ## 🛠 배포 환경
 
 - AWS EC2 + RDS
+- AWS 비용이 계속 청구되어 인스턴스 중지함. 
 
 <br>
 
